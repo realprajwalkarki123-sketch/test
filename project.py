@@ -41,7 +41,7 @@ def main():
   print("Now, let's enter student information and grades.")
   score_list=[]
  
-  for i in range(1,2):
+  for i in range(1,4):
      id=input("Enter student ID ")
      if( id=="end" or id=="END"):
        break
