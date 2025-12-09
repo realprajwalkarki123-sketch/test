@@ -99,6 +99,7 @@ def calculate_overall_score(score_list):
        Overall_score += int(value) * MODULE_CONFIGUARTION[key]
        rounded_score,category=round_to_category(Overall_score)
      student_db.append({student['name']:Overall_score,'rounded_score':rounded_score,'category':category})
+   print(student_db)
     
    
      
