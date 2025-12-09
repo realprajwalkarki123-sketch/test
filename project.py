@@ -32,8 +32,8 @@ def main():
     no_of_components=int(input("How many assessment components does this module have?"))
     for i in range(1,no_of_components+1):
       component_name= input(f"Component {i} name: ")
-      weight=input(f"Component {i} weight(%) ")
-      MODULE_CONFIGUARTION[component_name]=weight
+      weight=int(input(f"Component {i} weight(%) "))
+      MODULE_CONFIGUARTION[component_name]=weight/100
     print("Module configuration complete.")
 
     
