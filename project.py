@@ -1,7 +1,7 @@
 from datetime import datetime, date
 from tabulate import tabulate
 import csv
-# from colorama
+
 import os
 import ast
 
@@ -10,6 +10,7 @@ STUDENT_DB = []
 STUDENT_INFO = []
 MAIN_FILE = "students.txt"
 TABLE_FILE = "student_table.txt"
+id_list=[]
 
 
 def load_previous_students(filename=MAIN_FILE):
@@ -174,14 +175,20 @@ def get_valid_dob():
             print("Invalid date format. Please enter in YYYY-MM-DD format.")
 
 def check_for_id(id):
+    id_list.append(id)
+    isPresent=list(filter(lambda x:x==id,id_list))
+    if(len(isPresent)>1):
+        return True
     data=load_previous_students()
     for student in data:
         if(int(student['UID'])==id):
             return True
 
 def get_valid_id():
+    
     while True:
         id = input("Enter ID of the student ")
+        
         if  id.upper() == "END":
             return False
         try:
@@ -317,6 +324,9 @@ def advanced():
 
     print("\nImported and Calculated Student Results:\n")
     print(tabulate(get_clean_studentdb(STUDENT_DB), headers="keys", tablefmt="fancy_grid"))
+    save_table(get_clean_studentdb(STUDENT_DB))
+    save_students(get_clean_studentdb(STUDENT_DB))
+    
 if __name__ == "__main__":
      ans=int(input("Do you want to manually enter the data or import from file ( 1 for manual and 2 for import)"))
      match ans:
