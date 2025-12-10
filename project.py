@@ -1,33 +1,44 @@
-from datetime import datetime,date
+from datetime import datetime, date
 from tabulate import tabulate
+
+# from colorama
 import os
 import ast
-MODULE_CONFIGUARTION={}
-STUDENT_DB=[]
-STUDENT_INFO=[]
-MAIN_FILE="students.txt"
-TABLE_FILE="student_table.txt"
+
+MODULE_CONFIGUARTION = {}
+STUDENT_DB = []
+STUDENT_INFO = []
+MAIN_FILE = "students.txt"
+TABLE_FILE = "student_table.txt"
+
+
 def load_previous_students(filename=MAIN_FILE):
-   if not os.path.exists(filename):
-      return []
-   with open(filename,"r") as f:
-      content=f.read().strip()
-   try:
-      return  ast.literal_eval(content)
-   except Exception as e:
-      print("Something  unexpected happen and fail to load the students")
-      return []
+    if not os.path.exists(filename):
+        return []
+    with open(filename, "r") as f:
+        content = f.read().strip()
+    try:
+        return ast.literal_eval(content)
+    except Exception as e:
+        print("Something  unexpected happen and fail to load the students")
+        return []
+
+
 def save_table(students, filename=TABLE_FILE):
     table_str = tabulate(get_clean_studentdb(students), headers="keys", tablefmt="grid")
     with open(filename, "w") as f:
         f.write(table_str)
-def save_students(DATABASE,filename=MAIN_FILE):
-   with open(filename,"w") as f:
-      f.write(str(DATABASE))
-      
+
+
+def save_students(DATABASE, filename=MAIN_FILE):
+    with open(filename, "w") as f:
+        f.write(str(DATABASE))
+
+
 def get_clean_studentdb(db):
-   clean=[{key: value for key, value in d.items() if key!= "scores"} for d in db]
-   return clean
+    clean = [{key: value for key, value in d.items() if key != "scores"} for d in db]
+    return clean
+
 
 def round_to_category(score):
     score = float(score)
@@ -115,99 +126,145 @@ def round_to_category(score):
     # -----------------------------
     else:
         return 100, "Gold Standard"
-def get_student_age(dob):
-   today=date.today()
-   return today.year - dob.year-((today.month,today.day)<(dob.month,dob.day))
-   
-def calculate_overall_score(score_list):
-   
 
-   for student in score_list:
-     Overall_score=0
-     for key,value in  student['scores'].items():
-       Overall_score += int(value) * MODULE_CONFIGUARTION[key]
-       rounded_score,category=round_to_category(Overall_score)
-     STUDENT_DB.append({**student,'raw score':Overall_score,'rounded_score':rounded_score,'category':category})
-   
-   
+
+def get_student_age(dob):
+    today = date.today()
+    return today.year - dob.year - ((today.month, today.day) < (dob.month, dob.day))
+
+
+def calculate_overall_score(score_list):
+
+    for student in score_list:
+        Overall_score = 0
+        for key, value in student["scores"].items():
+            Overall_score += int(value) * MODULE_CONFIGUARTION[key]
+            rounded_score, category = round_to_category(Overall_score)
+        STUDENT_DB.append(
+            {
+                **student,
+                "raw score": Overall_score,
+                "rounded_score": rounded_score,
+                "category": category,
+            }
+        )
+
+
 def get_valid_score(component):
-   while True:
-      score=int(input(f"{component} score "))
-      if(score>=0 and score<=100):
-         return score
-      if(score<0):
-         print("Score must be greater or equal to zero")
-      if(score>100):
-         print("Score must be less than or equal to 100")
-    
-   
+    while True:
+        score = int(input(f"{component} score "))
+        if score >= 0 and score <= 100:
+            return score
+        if score < 0:
+            print("Score must be greater or equal to zero")
+        if score > 100:
+            print("Score must be less than or equal to 100")
+
+
 def get_valid_dob():
-   while True:
+    while True:
         dob_input = input("Date of Birth (YYYY-MM-DD): ")
         try:
             actual_dob = datetime.strptime(dob_input, "%Y-%m-%d").date()
-            today=date.today()
-            if actual_dob.year<=today.year:            
-             return actual_dob
-            print("This can't be your correct date of birth") 
+            today = date.today()
+            if actual_dob.year <= today.year:
+                return actual_dob
+            print("This can't be your correct date of birth")
         except ValueError:
-            print("Invalid date format. Please enter in YYYY-MM-DD format.")   
-   
-  
-#   print(score_list)
-  
+            print("Invalid date format. Please enter in YYYY-MM-DD format.")
+
+def check_for_id(id):
+    data=load_previous_students()
+    for student in data:
+        if(int(student['UID'])==id):
+            return True
+
+def get_valid_id():
+    while True:
+        id = input("Enter ID of the student ")
+        if  id.upper() == "END":
+            return False
+        try:
+           isPresent=check_for_id(int(id))
+           if not isPresent:
+               if int(id) < 99 and int(id) > 0:
+                   return id
+               print("Id must be less than 100 and greater than 0")
+           print("Student already exits with the same UID")
+        except ValueError:
+                 print("Invalid number")
+       
+
+
 def main():
 
-  print("Welcome to the Student Grading System First, let's set up the module configuration. ")
+    print(
+        "Welcome to the Student Grading System First, let's set up the module configuration. "
+    )
 
-  module_name=input("Enter module name ")
-  ans=input("Do you want to use the default module configuration(y/n)? ")
-  if(ans.upper()=='Y'):
-     default_list=[{'name': 'Coursework_1','weight':0.1},{'name': 'Coursework_2','weight':0.2},{'name': 'Coursework_3','weight':0.3},{'name': 'final_exam','weight':0.4}]
-     for item in default_list:
-      MODULE_CONFIGUARTION[item['name']]=item['weight']
+    module_name = input("Enter module name ")
+    ans = input("Do you want to use the default module configuration(y/n)? ")
+    if ans.upper() == "Y":
+        default_list = [
+            {"name": "Coursework_1", "weight": 0.1},
+            {"name": "Coursework_2", "weight": 0.2},
+            {"name": "Coursework_3", "weight": 0.3},
+            {"name": "final_exam", "weight": 0.4},
+        ]
+        for item in default_list:
+            MODULE_CONFIGUARTION[item["name"]] = item["weight"]
     #  module_name=()
 
+    else:
+        no_of_components = int(
+            input("How many assessment components does this module have?")
+        )
+        for i in range(1, no_of_components + 1):
+            component_name = input(f"Component {i} name: ")
+            weight = int(input(f"Component {i} weight(%) "))
+            MODULE_CONFIGUARTION[component_name] = weight / 100
+        print("Module configuration complete.")
 
-  else:
-    no_of_components=int(input("How many assessment components does this module have?"))
-    for i in range(1,no_of_components+1):
-      component_name= input(f"Component {i} name: ")
-      weight=int(input(f"Component {i} weight(%) "))
-      MODULE_CONFIGUARTION[component_name]=weight/100
-    print("Module configuration complete.")
+    print("Now, let's enter student information and grades.")
 
+    for i in range(1, 4):
+        id = get_valid_id()
+        if not id:
+            break
+        name = input("Enter name of the student ")
+        dob = get_valid_dob()
+        age = get_student_age(dob)
+        student_data = {
+            "UID": id,
+            "name": name,
+            "DOB": dob.strftime("%Y-%m-%d"),
+            "age": age,
+            "scores": {},
+        }
+        for component in list(MODULE_CONFIGUARTION.keys()):
+            score = get_valid_score(component)
+            student_data["scores"][component] = score
+        STUDENT_INFO.append(student_data)
+
+    calculate_overall_score(STUDENT_INFO)
+    previous_students = load_previous_students(MAIN_FILE)
+    
+    if STUDENT_DB:
+        DATABASE = get_clean_studentdb(STUDENT_DB)
+    else:
+        DATABASE=[]
+    COMPLETE_DATABASE=DATABASE+previous_students
     
 
-  print("Now, let's enter student information and grades.")
+
+    
+    SORTED_DATABASE = sorted(COMPLETE_DATABASE, key=lambda x: int(x["UID"]))
+    table = tabulate(SORTED_DATABASE, headers="keys", tablefmt="fancy_grid")
+
+    save_students(SORTED_DATABASE)
+    save_table(SORTED_DATABASE)
+    print(table)
 
 
-  for i in range(1,4):
-     id=input("Enter student ID ")
-     if( id.upper()=="END"):
-       break
-     name=input("Enter name of the student ")
-     dob=get_valid_dob()
-     age=get_student_age(dob)
-     student_data={'UID':id,'name':name,"DOB":dob.strftime("%Y-%m-%d"),"age":age,"scores":{}}
-     for component in list(MODULE_CONFIGUARTION.keys()):
-       score=get_valid_score(component)
-       student_data['scores'][component]=score
-     STUDENT_INFO.append(student_data)
-
-
-  calculate_overall_score(STUDENT_INFO)
-  if(STUDENT_DB):
-     DATABASE=get_clean_studentdb(STUDENT_DB)
-  previous_students=load_previous_students(MAIN_FILE)
-  table=tabulate(previous_students+DATABASE,headers="keys",tablefmt="fancy_grid")
-  
-  
-  save_students(previous_students+DATABASE)
-  save_table(previous_students+DATABASE)
-  print(table)
-  
-
-
-if __name__=="__main__":
-  main()
+if __name__ == "__main__":
+    main()
