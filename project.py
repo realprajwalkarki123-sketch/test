@@ -318,7 +318,7 @@ def advanced():
     print("\nImported and Calculated Student Results:\n")
     print(tabulate(get_clean_studentdb(STUDENT_DB), headers="keys", tablefmt="fancy_grid"))
 if __name__ == "__main__":
-     ans=input("Do you want to manually enter the data or import from file ( 1 for manual and 2 for import)")
+     ans=int(input("Do you want to manually enter the data or import from file ( 1 for manual and 2 for import)"))
      match ans:
          case 1:
              main()
