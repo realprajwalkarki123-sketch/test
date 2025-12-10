@@ -1,6 +1,6 @@
 from datetime import datetime, date
 from tabulate import tabulate
-
+import csv
 # from colorama
 import os
 import ast
@@ -131,7 +131,7 @@ def round_to_category(score):
 def get_student_age(dob):
     today = date.today()
     return today.year - dob.year - ((today.month, today.day) < (dob.month, dob.day))
-
+    
 
 def calculate_overall_score(score_list):
 
@@ -154,7 +154,7 @@ def get_valid_score(component):
     while True:
         score = int(input(f"{component} score "))
         if score >= 0 and score <= 100:
-            return score
+            return score  
         if score < 0:
             print("Score must be greater or equal to zero")
         if score > 100:
@@ -195,7 +195,6 @@ def get_valid_id():
                  print("Invalid number")
        
 
-
 def main():
 
     print(
@@ -226,9 +225,10 @@ def main():
         print("Module configuration complete.")
 
     print("Now, let's enter student information and grades.")
-
+    
     for i in range(1, 4):
         id = get_valid_id()
+        
         if not id:
             break
         name = input("Enter name of the student ")
@@ -265,6 +265,64 @@ def main():
     save_table(SORTED_DATABASE)
     print(table)
 
+def advanced():
+    filename = input("Enter the filename: ")
 
+    if not os.path.exists(filename):
+        print("File not found.")
+        return []
+
+    with open(filename, "r") as f:
+        content = f.read().strip()
+
+    headers = ["StudentID", "Name", "DateOfBirth",
+               "Coursework_1", "Coursework_2", "Coursework_3", "Coursework_4"]
+
+    students = []
+
+    for line in content.split("\n"):
+        if not line.strip():
+            continue
+
+        values = line.split(",")
+        row = dict(zip(headers, values))
+
+      
+        scores_dict = {
+            "Coursework_1": int(row["Coursework_1"]),
+            "Coursework_2": int(row["Coursework_2"]),
+            "Coursework_3": int(row["Coursework_3"]),
+            "Coursework_4": int(row["Coursework_4"]),
+        }
+
+        student_data = {
+            "UID": row["StudentID"],
+            "name": row["Name"],
+            "DOB": row["DateOfBirth"],
+            "age": get_student_age(datetime.strptime(row["DateOfBirth"], "%Y-%m-%d").date()),
+            "scores": scores_dict
+        }
+
+        students.append(student_data)
+
+  
+    MODULE_CONFIGUARTION.clear()
+    MODULE_CONFIGUARTION["Coursework_1"] = 0.1
+    MODULE_CONFIGUARTION["Coursework_2"] = 0.2
+    MODULE_CONFIGUARTION["Coursework_3"] = 0.3
+    MODULE_CONFIGUARTION["Coursework_4"] = 0.4
+
+   
+    calculate_overall_score(students)
+
+    print("\nImported and Calculated Student Results:\n")
+    print(tabulate(get_clean_studentdb(STUDENT_DB), headers="keys", tablefmt="fancy_grid"))
 if __name__ == "__main__":
-    main()
+     ans=input("Do you want to manually enter the data or import from file ( 1 for manual and 2 for import)")
+     match ans:
+         case 1:
+             main()
+         case 2:
+             advanced()
+
+
