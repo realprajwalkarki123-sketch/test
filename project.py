@@ -1,8 +1,33 @@
-from datetime import datetime
-
-
+from datetime import datetime,date
+from tabulate import tabulate
+import os
+import ast
 MODULE_CONFIGUARTION={}
-student_db=[]
+STUDENT_DB=[]
+STUDENT_INFO=[]
+MAIN_FILE="students.txt"
+TABLE_FILE="student_table.txt"
+def load_previous_students(filename=MAIN_FILE):
+   if not os.path.exists(filename):
+      return []
+   with open(filename,"r") as f:
+      content=f.read().strip()
+   try:
+      return  ast.literal_eval(content)
+   except Exception as e:
+      print("SOmething  unexpected happen and fail to load the students")
+      return []
+def save_table(students, filename=TABLE_FILE):
+    table_str = tabulate(get_clean_studentdb(students), headers="keys", tablefmt="grid")
+    with open(filename, "w") as f:
+        f.write(table_str)
+def save_students(DATABASE,filename=MAIN_FILE):
+   with open(filename,"w") as f:
+      f.write(str(DATABASE))
+      
+def get_clean_studentdb(db):
+   clean=[{key: value for key, value in d.items() if key!= "scores"} for d in db]
+   return clean
 
 def round_to_category(score):
     score = float(score)
@@ -90,16 +115,21 @@ def round_to_category(score):
     # -----------------------------
     else:
         return 100, "Gold Standard"
-
+def get_student_age(dob):
+   today=date.today()
+   return today.year - dob.year-((today.month,today.day)<(dob.month,dob.day))
+   
 def calculate_overall_score(score_list):
+   
 
    for student in score_list:
      Overall_score=0
      for key,value in  student['scores'].items():
        Overall_score += int(value) * MODULE_CONFIGUARTION[key]
        rounded_score,category=round_to_category(Overall_score)
-     student_db.append({student['name']:Overall_score,'rounded_score':rounded_score,'category':category})
-   print(student_db)
+     STUDENT_DB.append({**student,'raw score':Overall_score,'rounded_score':rounded_score,'category':category})
+   
+   
     
    
      
@@ -108,6 +138,7 @@ def calculate_overall_score(score_list):
 #   print(score_list)
   
 def main():
+
   print("Welcome to the Student Grading System First, let's set up the module configuration. ")
 
   module_name=input("Enter module name ")
@@ -130,7 +161,7 @@ def main():
     
 
   print("Now, let's enter student information and grades.")
-  score_list=[]
+
  
   for i in range(1,4):
      id=input("Enter student ID ")
@@ -139,15 +170,25 @@ def main():
      name=input("Enter name of the student ")
      dob=input("Date of Birth (YYYY-MM-DD) ")
      actual_dob=datetime.strptime(dob,"%Y-%m-%d").date()
-     student_data={'name':name,"scores":{}}
+     age=get_student_age(actual_dob)
+     student_data={'UID':id,'name':name,"DOB":dob,"age":age,"scores":{}}
      for component in list(MODULE_CONFIGUARTION.keys()):
-       score=input(f"{component} score")
+       score=input(f"{component} score ")
        student_data['scores'][component]=score
-     score_list.append(student_data)
+     STUDENT_INFO.append(student_data)
 
 
-  calculate_overall_score(score_list)
-
+  calculate_overall_score(STUDENT_INFO)
+  if(STUDENT_DB):
+     DATABASE=get_clean_studentdb(STUDENT_DB)
+  previous_students=load_previous_students(MAIN_FILE)
+  table=tabulate(previous_students+DATABASE,headers="keys",tablefmt="grid")
+  
+  
+  save_students(previous_students+DATABASE)
+  save_table(previous_students+DATABASE)
+  print(table)
+  
 
 
 if __name__=="__main__":
