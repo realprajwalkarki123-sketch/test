@@ -15,7 +15,7 @@ def load_previous_students(filename=MAIN_FILE):
    try:
       return  ast.literal_eval(content)
    except Exception as e:
-      print("SOmething  unexpected happen and fail to load the students")
+      print("Something  unexpected happen and fail to load the students")
       return []
 def save_table(students, filename=TABLE_FILE):
     table_str = tabulate(get_clean_studentdb(students), headers="keys", tablefmt="grid")
@@ -130,9 +130,25 @@ def calculate_overall_score(score_list):
      STUDENT_DB.append({**student,'raw score':Overall_score,'rounded_score':rounded_score,'category':category})
    
    
+def get_valid_score(component):
+   while True:
+      score=int(input(f"{component} score "))
+      if(score>=0 and score<=100):
+         return score
+      if(score<0):
+         print("Score must be greater or equal to zero")
+      if(score>100):
+         print("Score must be less than or equal to 100")
     
    
-     
+def get_valid_dob():
+   while True:
+        dob_input = input("Date of Birth (YYYY-MM-DD): ")
+        try:
+            actual_dob = datetime.strptime(dob_input, "%Y-%m-%d").date()
+            return actual_dob
+        except ValueError:
+            print("Invalid date format. Please enter in YYYY-MM-DD format.")   
    
   
 #   print(score_list)
@@ -162,18 +178,17 @@ def main():
 
   print("Now, let's enter student information and grades.")
 
- 
+
   for i in range(1,4):
      id=input("Enter student ID ")
-     if( id=="end" or id=="END"):
+     if( id.upper()=="END"):
        break
      name=input("Enter name of the student ")
-     dob=input("Date of Birth (YYYY-MM-DD) ")
-     actual_dob=datetime.strptime(dob,"%Y-%m-%d").date()
-     age=get_student_age(actual_dob)
-     student_data={'UID':id,'name':name,"DOB":dob,"age":age,"scores":{}}
+     dob=get_valid_dob()
+     age=get_student_age(dob)
+     student_data={'UID':id,'name':name,"DOB":dob.strftime("%Y-%m-%d"),"age":age,"scores":{}}
      for component in list(MODULE_CONFIGUARTION.keys()):
-       score=input(f"{component} score ")
+       score=get_valid_score(component)
        student_data['scores'][component]=score
      STUDENT_INFO.append(student_data)
 
@@ -182,7 +197,7 @@ def main():
   if(STUDENT_DB):
      DATABASE=get_clean_studentdb(STUDENT_DB)
   previous_students=load_previous_students(MAIN_FILE)
-  table=tabulate(previous_students+DATABASE,headers="keys",tablefmt="grid")
+  table=tabulate(previous_students+DATABASE,headers="keys",tablefmt="fancy_grid")
   
   
   save_students(previous_students+DATABASE)
