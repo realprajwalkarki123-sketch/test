@@ -146,7 +146,10 @@ def get_valid_dob():
         dob_input = input("Date of Birth (YYYY-MM-DD): ")
         try:
             actual_dob = datetime.strptime(dob_input, "%Y-%m-%d").date()
-            return actual_dob
+            today=date.today()
+            if actual_dob.year<=today.year:            
+             return actual_dob
+            print("This can't be your correct date of birth") 
         except ValueError:
             print("Invalid date format. Please enter in YYYY-MM-DD format.")   
    
